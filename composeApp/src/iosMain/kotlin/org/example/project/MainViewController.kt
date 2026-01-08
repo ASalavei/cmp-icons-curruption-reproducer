@@ -62,7 +62,9 @@ import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSOperationQueue
 import platform.MapKit.MKMapView
 import platform.MapKit.MKPointAnnotation
+import platform.MapKit.MKTileOverlay
 import platform.MapKit.MKUserLocation
+import platform.MapKit.addOverlays
 import platform.MapKit.overlays
 import platform.MapKit.removeOverlays
 import platform.UIKit.UIApplicationDidEnterBackgroundNotification
@@ -72,14 +74,14 @@ import kotlin.random.Random
 fun Content() {
     var mapView: MKMapView? by remember { mutableStateOf(null) }
     var isNewLaunch by remember { mutableStateOf(true) }
-
+    val delegate = remember { MapViewDelegate() }
     DisposableEffect(mapView) {
         val observer = NSNotificationCenter.defaultCenter.addObserverForName(
             name = UIApplicationDidEnterBackgroundNotification,
             `object` = null,
             queue = NSOperationQueue.mainQueue
         ) { _ ->
-            mapView?.clearAllContent()
+            // mapView?.clearAllContent() <- with his it seems to work. Leaving overlays on map while backgrounded should cause the corrupted state issue.
         }
         onDispose {
             NSNotificationCenter.defaultCenter.removeObserver(observer)
@@ -142,13 +144,18 @@ fun Content() {
         Row(Modifier.fillMaxWidth()) {
             Button(onClick = {
                 isNewLaunch = false
-                val lat = 48.1351 + (Random.nextDouble() - 0.5) * 0.1
-                val lon = 11.5820 + (Random.nextDouble() - 0.5) * 0.1
-                val annotation = MKPointAnnotation().apply {
-                    setCoordinate(CLLocationCoordinate2DMake(lat, lon))
-                    setTitle("Munich Pin")
+                //val lat = 48.1351 + (Random.nextDouble() - 0.5) * 0.1
+                //val lon = 11.5820 + (Random.nextDouble() - 0.5) * 0.1
+                //val annotation = MKPointAnnotation().apply {
+                //    setCoordinate(CLLocationCoordinate2DMake(lat, lon))
+                //    setTitle("Munich Pin")
+                //}
+                //mapView?.addAnnotation(annotation)
+                val tiles = (1..20).map {
+                    MKTileOverlay("https://tiles.zoom.earth/static/bluemarble/jan/{z}/{x}/{y}.jpg")
                 }
-                mapView?.addAnnotation(annotation)
+                mapView?.addOverlays(tiles)
+
             }, modifier = Modifier.weight(1f).padding(4.dp)) {
                 Text("Add annotation")
             }
@@ -163,6 +170,7 @@ fun Content() {
             factory = {
                 MKMapView(CGRectZero.readValue()).also {
                     mapView = it
+                    mapView?.setDelegate(delegate)
                 }
             },
             modifier = Modifier.weight(1f).fillMaxWidth(),
