@@ -60,10 +60,10 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         iosArm64Main.dependencies {
-            implementation("org.funny.project:funnylibrary-iosArm64:1.0.0")
+            //implementation("org.funny.project:funnylibrary-iosArm64:1.0.0")
         }
         iosSimulatorArm64Main.dependencies {
-            implementation("org.funny.project:funnylibrary-iosSimulatorArm64:1.0.0")
+            //implementation("org.funny.project:funnylibrary-iosSimulatorArm64:1.0.0")
         }
     }
 }
